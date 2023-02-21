@@ -79,7 +79,6 @@ namespace AI_API.Controllers
                 return StatusCode((int)response.StatusCode, response.Content);
             }
 
-
         }
 
         [HttpPost,Route("createImage")]
@@ -98,6 +97,37 @@ namespace AI_API.Controllers
                 """;
             request.AddParameter("application/json", body, ParameterType.RequestBody);
             RestResponse response = await client.ExecuteAsync(request);
+
+            if (response.IsSuccessful)
+            {
+                return Ok(response.Content);
+            }
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                return BadRequest(response.Content);
+            }
+            else
+            {
+                return StatusCode((int)response.StatusCode, response.Content);
+            }
+        }
+
+        [HttpPost, Route("createEmbeddings")]
+        public async Task<IActionResult> PostCreateEmbeddings(string model, string input)
+        {
+            var client = new RestClient(APIURL);
+            var request = new RestRequest($"/v1/embeddings", Method.Post);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", $"Bearer {Environment.GetEnvironmentVariable("OPENAIKEY")}");
+            string body = $$"""
+                {
+                "model": "{{model}}",
+                "input": "{{input}}"
+                 }            
+                """;
+            request.AddParameter("application/json", body, ParameterType.RequestBody);
+            RestResponse response = await client.ExecuteAsync(request);
+
             if (response.IsSuccessful)
             {
                 return Ok(response.Content);
