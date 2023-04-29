@@ -80,6 +80,29 @@ namespace AI_API.Controllers
             }
 
         }
+        [HttpPost, Route("chat")]
+        public async Task<IActionResult> PostChat()
+        {
+            var options = new RestClientOptions("https://api.openai.com")
+            {
+                MaxTimeout = -1,
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest("/v1/chat/completions", Method.Post);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer BearerToken");
+            var body = """
+                {
+                  "model": "gpt-3.5-turbo",
+                  "messages": [{"role": "user", "content": "Show me simple PageModel class with used authorization attribute"}]
+                }
+                """;
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.ExecuteAsync(request);
+            Console.WriteLine(response.Content);
+
+            return Ok(response.Content);
+        }
 
         [HttpPost,Route("createImage")]
         public async Task<IActionResult> PostCreateImage(string prompt, int numberOfImages, string size)
